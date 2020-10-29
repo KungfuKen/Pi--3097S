@@ -3,30 +3,47 @@ import board
 import adafruit_dht
 from Adafruit_IO import Client, Feed
 
-dhtDevice = adafruit_dht.DHT11(board.D24)
-IO_USERNAME = "Ddoy"
-IO_KEY = "aio_yUIJ069dQu9qP80Eie2fpLLZYhD1"
+class SetUp:
+	def __init__(self, dhtDevice, IO_USERNAME, IO_KEY, aio):
+		self.dhtDevice = dhtDevice
+		self.IO_USERNAME = IO_USERNAME
+		self.IO_KEY = IO_KEY
+		self.aio = aio
 
-aio = Client(IO_USERNAME, IO_KEY)
+class SetFeed:
+	def __init__(self, temperature_feed, humidity_feed):
+		self.temperature_feed = temperature_feed
+		self.humidity_feed = humidity_feed
 
-temperature_feed = aio.feeds('temperature')
-humidity_feed = aio.feeds('humidity')
+class ReadAndSend:
+	def __init__(self):
+		pass
 
-while True:
-	try:
-		temperature_c = dhtDevice.temperature
-		humidity = dhtDevice.humidity
-		print("Temp: {:.1f} C  Humidity: {}%".format(temperature_c, humidity))
-		aio.send(temperature_feed.key, str(temperature_c))
-		aio.send(humidity_feed.key, str(humidity))
-	except RuntimeError as error:
-		print(error.args[0])
-		time.sleep(1.0)
-		continue
-	except Exception as error:
+	def readAndSend(self):
+		newSetUp = SetUp(adafruit_dht.DHT11(board.D24), "Ddoy", "aio_AXLV57Ynf0Qw5HZ0Vk1dGNSxrJp2", Client("Ddoy", "aio_AXLV57Ynf0Qw5HZ0Vk1dGNSxrJp2"))
+		newFeed = SetFeed(newSetUp.aio.feeds('temperature'), newSetUp.aio.feeds('humidity'))
+		while True:
+			try:
+				temperature = newSetUp.dhtDevice.temperature
+				humidity = newSetUp.dhtDevice.humidity
+				print("Temp: {:.1f} C  Humidity: {}%".format(temperature, humidity))
+				newSetUp.aio.send(newFeed.temperature_feed.key, str(temperature))
+				newSetUp.aio.send(newFeed.humidity_feed.key, str(humidity))
+			except RuntimeError as error:
+				print(error.args[0])
+				time.sleep(1.0)
+				continue
+			except Exception as error:
+				exceptionError()
+			except (KeyboardInterrupt, SystemExit):
+				interrupt()
+			time.sleep(1.0)
+
+	def exceptionError(self):
 		dhtDevice.exit()
 		raise error
-	except (KeyboardInterrupt, SystemExit):
+	def interrupt(self):
 		raise Exception("Program Closed")
-	time.sleep(1.0)
 
+newRead = ReadAndSend()
+newRead.readAndSend()
