@@ -8,7 +8,7 @@ from adafruit_mcp3xxx.analog_in import AnalogIn
 import adafruit_dht
 from Adafruit_IO import Client, Feed
 
-#sets up dht11 output to pi GPIO and logs provides login details to webclient
+#sets up dht11 output to pi GPIO and provides login details to webclient
 class SetUp:
 	def __init__(self, dhtDevice, IO_USERNAME, IO_KEY, aio):
 		self.dhtDevice = dhtDevice
